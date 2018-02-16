@@ -73,6 +73,7 @@
 #define CONFIG_SYS_MAX_NAND_DEVICE	1
 #define CONFIG_SYS_NAND_ONFI_DETECTION
 #define CONFIG_MTD_DEVICE
+# define CONFIG_CMD_MTDPARTS
 #endif
 
 /* MMC */
@@ -88,6 +89,7 @@
 # define CONFIG_USB_CABLE_CHECK
 # define CONFIG_THOR_RESET_OFF
 # define CONFIG_USB_FUNCTION_THOR
+# define CONFIG_USB_FUNCTION_MASS_STORAGE
 # define DFU_ALT_INFO_RAM \
 	"dfu_ram_info=" \
 	"set dfu_alt_info " \
@@ -122,6 +124,25 @@
 
 #if defined(CONFIG_MMC_SDHCI_ZYNQ) || defined(CONFIG_ZYNQ_USB)
 # define CONFIG_SUPPORT_VFAT
+# define CONFIG_FAT_WRITE
+# define CONFIG_DOS_PARTITION
+#endif
+
+/* NAND SPL boot */
+/* FIXME: Doesn't build right now */
+/* Some example code: https://github.com/Elphel/ezynq/tree/master/u-boot-tree/drivers/mtd/nand */
+#ifdef CONFIG_SPL_NAND_SUPPORT
+# define CONFIG_SPL_NAND_DRIVERS
+# define CONFIG_SPL_NAND_INIT
+# define CONFIG_SPL_NAND_LOAD
+# define CONFIG_SPL_NAND_BASE
+# define CONFIG_SPL_NAND_ECC
+/* FIXME: If we ever do NAND booting on the SDS1202X-E, we need another partition
+   layout and enter the correct offset and size here to the main u-boot being loaded from the SPL u-boot */
+# define CONFIG_SYS_NAND_U_BOOT_OFFS 0x10000
+# define CONFIG_SYS_NAND_U_BOOT_SIZE (512 << 10)
+# define CONFIG_SYS_NAND_U_BOOT_DST CONFIG_SYS_TEXT_BASE
+# define CONFIG_SYS_NAND_U_BOOT_START CONFIG_SYS_NAND_U_BOOT_DST
 #endif
 
 #if defined(CONFIG_ZYNQ_I2C0) || defined(CONFIG_ZYNQ_I2C1)
@@ -210,6 +231,7 @@
 /* Default environment */
 #ifndef CONFIG_EXTRA_ENV_SETTINGS
 #define CONFIG_EXTRA_ENV_SETTINGS	\
+	"autoload=no\0" \
 	"ethaddr=00:0a:35:00:01:22\0"	\
 	"kernel_image=uImage\0"	\
 	"kernel_load_address=0x2080000\0" \
@@ -286,10 +308,10 @@
 		"nand read ${ramdisk_load_address} 0x620000 ${ramdisk_size} && " \
 		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
 	"jtagboot=echo TFTPing Linux to RAM... && " \
+		"dhcp &&" \
 		"tftpboot ${kernel_load_address} ${kernel_image} && " \
 		"tftpboot ${devicetree_load_address} ${devicetree_image} && " \
-		"tftpboot ${ramdisk_load_address} ${ramdisk_image} && " \
-		"bootm ${kernel_load_address} ${ramdisk_load_address} ${devicetree_load_address}\0" \
+		"bootm ${kernel_load_address} - ${devicetree_load_address}\0" \
 	"rsa_norboot=echo Copying Image from NOR flash to RAM... && " \
 		"cp.b 0xE2100000 0x100000 ${boot_size} && " \
 		"zynqrsa 0x100000 && " \

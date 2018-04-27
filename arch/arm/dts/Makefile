@@ -153,7 +153,8 @@ dtb-$(CONFIG_ARCH_ZYNQ) += \
 	zynq-zed.dtb \
 	zynq-zturn-myir.dtb \
 	zynq-zybo.dtb \
-	zynq-sds1202xe.dtb
+	zynq-sds1202xe.dtb \
+	zynq-sds1104xe.dtb
 dtb-$(CONFIG_ARCH_ZYNQMP) += \
 	zynqmp-mini.dtb				\
 	zynqmp-mini-qspi-parallel.dtb		\

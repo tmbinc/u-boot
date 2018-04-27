@@ -1,0 +1,180 @@
+/dts-v1/;
+/include/ "zynq-7000.dtsi"
+
+/ {
+    model = "Siglent SDS1104X-E";
+    compatible = "xlnx,zynq-sds1104xe", "xlnx,zynq-7000";
+
+    aliases {
+        ethernet0 = &gem0;
+        serial0 = &uart1;
+    };
+
+    memory {
+        device_type = "memory";
+        reg = <0x0 0x10000000>;
+    };
+
+    chosen {
+        bootargs = "console=ttyPS0,115200 earlycon";
+        stdout-path = "serial0:115200n8";
+    };
+
+    usb_phy0: phy0 {
+        compatible = "usb-nop-xceiv";
+        #phy-cells = <0>;
+        reset-gpios = <&gpio0 52 1>;
+        //FIXME: add this and wire up the VBUS enable GPIO
+        //vbus-regulator = <&vbus_regulator>;
+        //FIXME: overcurrent detection?
+    };
+
+    usb_phy1: phy1 {
+        compatible = "usb-nop-xceiv";
+        #phy-cells = <0>;
+        reset-gpios = <&gpio0 53 1>;
+    };
+};
+
+&clkc {
+    ps-clk-frequency = <33333333>;
+};
+
+&gem0 {
+    status = "okay";
+    phy-mode = "mii";
+    phy-handle = <&ethernet_phy>;
+    xlnx,emio;
+
+    ethernet_phy: ethernet-phy@0x1f {
+    };
+};
+
+&uart1 {
+    status = "okay";
+    u-boot,dm-pre-reloc;
+};
+
+&usb0 {
+    status = "okay";
+    dr_mode = "host";
+    usb-phy = <&usb_phy0>;
+    //pinctrl-names = "default";
+    //pinctrl-0 = <&pinctrl_usb0_default>;
+};
+
+&usb1 {
+    status = "okay";
+    dr_mode = "peripheral";
+    usb-phy = <&usb_phy1>;
+    //pinctrl-names = "default";
+    //pinctrl-0 = <&pinctrl_usb1_default>;
+};
+
+//FIXME: original device tree has SPI1 enabled
+//All the signal path devices are connected to this
+//Siglent uses a custom driver, most likely for all the Latch, CS etc. lines
+//&spi0 {
+//    status = "okay"
+//};
+
+//FIXME: original device tree has SPI1 enabled
+//Most likely the frontpanel LEDs are connected to this
+//Needs to be confirmed by looking at the scope app binary
+//&spi1 {
+//    status = "okay"
+//};
+
+//FIXME: SDHCI0 is enabled in original device tree
+//&sdhci0 {
+//    status = "okay";
+//};
+
+&smcc {
+    status = "okay";
+    u-boot,dm-pre-reloc;
+};
+
+&nand0 {
+    status = "okay";
+
+    arm,nand-cycle-t0 = <0x5>;
+    arm,nand-cycle-t1 = <0x5>;
+    arm,nand-cycle-t2 = <0x2>;
+    arm,nand-cycle-t3 = <0x3>;
+    arm,nand-cycle-t4 = <0x1>;
+    arm,nand-cycle-t5 = <0x2>;
+    arm,nand-cycle-t6 = <0x2>;
+
+    partition@nand-fsbl {
+        label = "fsbl";
+        reg = <0x0 0x780000>;
+    };
+    partition@nand-linux {
+        label = "kerneldata";
+        reg = <0x780000 0x400000>;
+    };
+    partition@nand-device-tree {
+        label = "device-tree";
+        reg = <0xb80000 0x80000>;
+    };
+    partition@nand-manufacturedata {
+        label = "Manufacturedata";
+        reg = <0xc00000 0x500000>;
+    };
+    partition@nand-reserved1 {
+        label = "reserved1";
+        reg = <0x1100000 0x500000>;
+    };
+    partition@nand-rootfs {
+        label = "rootfs";
+        reg = <0x1600000 0x2800000>;
+    };
+    partition@nand-firmdata0 {
+        label = "firmdata0";
+        reg = <0x3e00000 0xa00000>;
+    };
+    partition@nand-siglent {
+        label = "siglent";
+        reg = <0x4800000 0x2800000>;
+    };
+    partition@nand-datafs {
+        label = "datafs";
+        reg = <0x7000000 0x6400000>;
+    };
+    partition@nand-upgrade_cramdisk {
+        label = "upgrade_cramdisk";
+        reg = <0xd400000 0x2800000>;
+    };
+    partition@nand-reserved2 {
+        label = "reserved2";
+        reg = <0xfc00000 0x400000>;
+    };
+};
+
+//FIXME: configure pinctrl correctly
+//&pinctrl0 {
+//    pinctrl_usb0_default: usb0-default {
+//        mux {
+//            groups = "usb0_0_grp";
+//            function = "usb0";
+//        };
+//
+//        conf {
+//            groups = "usb0_0_grp";
+//            slew-rate = <0>;
+//            io-standard = <1>;
+//        };
+//
+//        conf-rx {
+//            pins = "MIO29", "MIO31", "MIO36";
+//            bias-high-impedance;
+//        };
+//
+//        conf-tx {
+//            pins = "MIO28", "MIO30", "MIO32", "MIO33", "MIO34",
+//                   "MIO35", "MIO37", "MIO38", "MIO39";
+//            bias-disable;
+//        };
+//    };
+//};

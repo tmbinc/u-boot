@@ -14,5 +14,6 @@ obj-y	+= ddrc.o
 obj-y	+= slcr.o
 obj-y	+= clk.o
 obj-y	+= lowlevel_init.o
+obj-y   += ps7_spl_init.o
 AFLAGS_lowlevel_init.o := -mfpu=neon
-obj-$(CONFIG_SPL_BUILD)	+= spl.o ps7_spl_init.o
+obj-$(CONFIG_SPL_BUILD)	+= spl.o

@@ -27,5 +27,11 @@ int __weak show_board_info(void)
 		printf("Model: %s\n", model);
 #endif
 
+	printf("running PS7 init...\n");
+	ps7_init();
+	printf("post config\n");
+	ps7_post_config();
+	printf("done\n");
+
 	return checkboard();
 }

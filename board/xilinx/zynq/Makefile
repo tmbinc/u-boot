@@ -21,6 +21,7 @@ endif
 endif
 
 obj-$(CONFIG_SPL_BUILD) += $(init-objs)
+obj-y += $(init-objs)
 
 # Suppress "warning: function declaration isn't a prototype"
 CFLAGS_REMOVE_ps7_init_gpl.o := -Wstrict-prototypes
